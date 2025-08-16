@@ -270,6 +270,54 @@ function swapTiles(grid, t1, t2) {
   grid.replaceChild(t1, t2);
   grid.replaceChild(t2, temp);
 }
+let firstSelected = null;
+
+function makeTileInteractive(tile, grid, result, url) {
+  // Desktop drag & drop
+  tile.setAttribute("draggable", true);
+  tile.addEventListener("dragstart", e => {
+    e.dataTransfer.setData("text/plain", "");
+    firstSelected = tile;
+  });
+
+  grid.addEventListener("drop", e => {
+    e.preventDefault();
+    if (firstSelected && e.target.classList.contains("tile")) {
+      swapTiles(grid, firstSelected, e.target);
+      checkImageAnswer(grid, url, result);
+    }
+    firstSelected = null;
+  });
+
+  grid.addEventListener("dragover", e => e.preventDefault());
+
+  // Mobile tap-swap
+  tile.addEventListener("click", () => {
+    if (!firstSelected) {
+      // first tap → highlight
+      firstSelected = tile;
+      tile.style.outline = "2px solid red";
+    } else if (firstSelected === tile) {
+      // tap same tile again → unselect
+      tile.style.outline = "";
+      firstSelected = null;
+    } else {
+      // second tap → swap
+      swapTiles(grid, firstSelected, tile);
+      firstSelected.style.outline = "";
+      firstSelected = null;
+      checkImageAnswer(grid, url, result);
+    }
+  });
+}
+
+function swapTiles(grid, t1, t2) {
+  let temp = document.createElement("div");
+  grid.replaceChild(temp, t1);
+  grid.replaceChild(t1, t2);
+  grid.replaceChild(t2, temp);
+}
+
 
   </script>
 </body>
