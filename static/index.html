@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Memory Mosaic</title>
+  <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+  <h1>Memory Mosaic🧩🎼</h1>
+
+  <div>
+    <input type="text" id="textInput" placeholder="e.g. My first solo trip to London">
+    <button onclick="addText()">Add Text</button>
+  </div>
+
+  <div>
+    <input type="text" id="imgInput" placeholder="Enter Image URL">
+    <button onclick="addImage()">Add Image</button>
+  </div>
+
+  <div>
+    <input type="file" id="audioInput" accept="audio/*">
+    <button onclick="addAudio()">Add Audio</button>
+  </div>
+
+  <h2>Feed</h2>
+  <div id="feed"></div>
+
+  <script>
+    // --- TEXT PUZZLE ---
+    function createWordPuzzle(sentence, container) {
+      const words = sentence.split(" ");
+      const shuffled = [...words].sort(() => Math.random() - 0.5);
+
+      container.innerHTML = "";
+      const puzzle = document.createElement("div");
+      puzzle.className = "puzzle-container";
+
+      shuffled.forEach(word => {
+        let span = document.createElement("span");
+        span.textContent = word;
+        span.className = "puzzle-word";
+        span.draggable = true;
+
+        span.addEventListener("dragstart", e => {
+          e.dataTransfer.setData("draggedIndex", [...puzzle.children].indexOf(e.target));
+        });
+
+        span.addEventListener("dragover", e => e.preventDefault());
+
+        span.addEventListener("drop", e => {
+          e.preventDefault();
+          let draggedIndex = e.dataTransfer.getData("draggedIndex");
+          let targetIndex = [...puzzle.children].indexOf(e.target);
+
+          if (draggedIndex >= 0 && targetIndex >= 0) {
+            let draggedEl = puzzle.children[draggedIndex];
+            puzzle.insertBefore(draggedEl, puzzle.children[targetIndex]);
+          }
+          checkWordAnswer(words, puzzle, result);
+        });
+
+        puzzle.appendChild(span);
+      });
+
+      const result = document.createElement("p");
+      container.appendChild(puzzle);
+      container.appendChild(result);
+    }
+
+    function checkWordAnswer(correctWords, puzzle, result) {
+      const current = [...puzzle.children].map(s => s.textContent);
+      if (JSON.stringify(current) === JSON.stringify(correctWords)) {
+        result.textContent = "✅ Correct!";
+        result.style.color = "green";
+      } else {
+        result.textContent = "";
+      }
+    }
+
+    function addText() {
+      const text = document.getElementById("textInput").value.trim();
+      if (!text) return;
+      const feed = document.getElementById("feed");
+      const item = document.createElement("div");
+      item.className = "feed-item";
+      item.innerHTML = "<b>TEXT — arrange the words</b>";
+      feed.appendChild(item);
+      createWordPuzzle(text, item);
+    }
+
+    // --- IMAGE PUZZLE ---
+    function createImagePuzzle(url, container) {
+      const grid = document.createElement("div");
+      grid.className = "grid";
+
+      let tiles = [];
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+          const tile = document.createElement("div");
+          tile.className = "tile";
+          tile.style.backgroundImage = `url(${url})`;
+          tile.style.backgroundPosition = `-${col * 100}px -${row * 100}px`;
+          tiles.push(tile);
+        }
+      }
+
+      // Shuffle tiles
+      tiles.sort(() => Math.random() - 0.5);
+      tiles.forEach(t => grid.appendChild(t));
+
+      let draggedTile = null;
+      grid.addEventListener("dragstart", e => {
+        draggedTile = e.target;
+      });
+      grid.addEventListener("dragover", e => e.preventDefault());
+      grid.addEventListener("drop", e => {
+        e.preventDefault();
+        if (draggedTile && e.target.classList.contains("tile")) {
+          let temp = document.createElement("div");
+          grid.replaceChild(temp, draggedTile);
+          grid.replaceChild(draggedTile, e.target);
+          grid.replaceChild(e.target, temp);
+        }
+        checkImageAnswer(grid, url, result);
+      });
+
+      const result = document.createElement("p");
+      container.appendChild(grid);
+      container.appendChild(result);
+    }
+
+    function checkImageAnswer(grid, url, result) {
+      const correctPositions = [];
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+          correctPositions.push(`-${col * 100}px -${row * 100}px`);
+        }
+      }
+      const current = [...grid.children].map(tile => tile.style.backgroundPosition);
+      if (JSON.stringify(current) === JSON.stringify(correctPositions)) {
+        result.textContent = "✅ Correct!";
+        result.style.color = "green";
+      } else {
+        result.textContent = "";
+      }
+    }
+
+    function addImage() {
+      const url = document.getElementById("imgInput").value.trim();
+      if (!url) return;
+      const feed = document.getElementById("feed");
+      const item = document.createElement("div");
+      item.className = "feed-item";
+      item.innerHTML = "<b>IMAGE — arrange the tiles</b>";
+      feed.appendChild(item);
+      createImagePuzzle(url, item);
+    }
+
+    // --- AUDIO PUZZLE ---
+    function createAudioPuzzle(fileUrl, container) {
+      const words = ["AUDIO", "SCRAMBLED", "CLIP"];
+      const shuffled = [...words].sort(() => Math.random() - 0.5);
+
+      const puzzle = document.createElement("div");
+      puzzle.className = "puzzle-container";
+
+      shuffled.forEach(word => {
+        let span = document.createElement("span");
+        span.textContent = word;
+        span.className = "puzzle-word";
+        span.draggable = true;
+
+        span.addEventListener("dragstart", e => {
+          e.dataTransfer.setData("draggedIndex", [...puzzle.children].indexOf(e.target));
+        });
+
+        span.addEventListener("dragover", e => e.preventDefault());
+
+        span.addEventListener("drop", e => {
+          e.preventDefault();
+          let draggedIndex = e.dataTransfer.getData("draggedIndex");
+          let targetIndex = [...puzzle.children].indexOf(e.target);
+
+          if (draggedIndex >= 0 && targetIndex >= 0) {
+            let draggedEl = puzzle.children[draggedIndex];
+            puzzle.insertBefore(draggedEl, puzzle.children[targetIndex]);
+          }
+          checkAudioAnswer(words, puzzle, result, fileUrl);
+        });
+
+        puzzle.appendChild(span);
+      });
+
+      const result = document.createElement("p");
+      container.appendChild(puzzle);
+      container.appendChild(result);
+    }
+
+    function checkAudioAnswer(correctWords, puzzle, result, fileUrl) {
+      const current = [...puzzle.children].map(s => s.textContent);
+      if (JSON.stringify(current) === JSON.stringify(correctWords)) {
+        result.innerHTML = "✅ Correct! <br><audio controls src='" + fileUrl + "'></audio>";
+        result.style.color = "green";
+      } else {
+        result.textContent = "";
+      }
+    }
+
+    function addAudio() {
+      const fileInput = document.getElementById("audioInput");
+      if (!fileInput.files.length) return;
+      const fileUrl = URL.createObjectURL(fileInput.files[0]);
+
+      const feed = document.getElementById("feed");
+      const item = document.createElement("div");
+      item.className = "feed-item";
+      item.innerHTML = "<b>AUDIO — solve to reveal the sound</b>";
+      feed.appendChild(item);
+      createAudioPuzzle(fileUrl, item);
+    }
+  </script>
+</body>
+</html>

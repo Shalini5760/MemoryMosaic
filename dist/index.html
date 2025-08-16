@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Memory Mosaic</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    .form-group { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .form-group label { font-weight: bold; }
+    input[type="text"] { padding: 5px; width: 420px; }
+    button { padding: 6px 12px; }
+    .memory-block { border-bottom: 1px solid #ddd; padding: 10px 0; }
+    .label { font-weight: bold; }
+    img { max-width: 400px; margin-top: 10px; }
+    .answer-row { display: flex; gap: 8px; margin-top: 8px; }
+    .ok { color: green; }
+    .bad { color: red; }
+    .demo-section { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Memory Mosaic</h1>
+
+  <div class="form-group">
+    <label>Text memory</label>
+    <input id="textMem" placeholder="e.g. My first solo trip to the mountains.">
+    <button id="addTextBtn">Add</button>
+  </div>
+
+  <div class="form-group">
+    <label>Image URL</label>
+    <input id="imageURL" placeholder="https://picsum.photos/800/600">
+    <button id="addImageBtn">Add</button>
+  </div>
+
+  <h2>Feed</h2>
+  <div id="feed"></div>
+
+  <script>
+    const API_BASE = '';
+
+    document.getElementById('addTextBtn').addEventListener('click', addText);
+    document.getElementById('addImageBtn').addEventListener('click', addImage);
+
+    function loadFeed() {
+      fetch(API_BASE + '/feed')
+        .then(res => res.json())
+        .then(data => {
+          const feed = document.getElementById('feed');
+          feed.innerHTML = '';
+          (data.data || []).slice(-50).reverse().forEach(mem => {
+            const div = document.createElement('div');
+            div.className = 'memory-block';
+            div.id = `mem-${mem.id}`;
+            if (mem.type === 'TEXT') {
+              div.innerHTML = `
+                <div class="label">TEXT</div>
+                <p>${escapeHTML(mem.content)}</p>
+                <button onclick="runTextBlank(${mem.id})">Demo: Text Blank</button>
+                <div id="demo-${mem.id}" class="demo-section"></div>
+              `;
+            } else {
+              div.innerHTML = `
+                <div class="label">IMAGE</div>
+                <img src="${escapeAttr(mem.url)}">
+                <button onclick="runImageScramble(${mem.id})">Demo: Image Scramble</button>
+                <div id="demo-${mem.id}" class="demo-section"></div>
+              `;
+            }
+            feed.appendChild(div);
+          });
+        });
+    }
+
+    function addText() {
+      const val = document.getElementById('textMem').value.trim();
+      if (!val) return;
+      fetch('/create-text', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({content: val})
+      }).then(() => { document.getElementById('textMem').value=''; loadFeed(); });
+    }
+
+    function addImage() {
+      const val = document.getElementById('imageURL').value.trim();
+      if (!val) return;
+      fetch('/create-image', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({url: val})
+      }).then(() => { document.getElementById('imageURL').value=''; loadFeed(); });
+    }
+
+    function runTextBlank(id) {
+      fetch(`/demo-text-blanks/${id}`).then(r=>r.json()).then(d=>{
+        const div = document.getElementById(`demo-${id}`);
+        div.innerHTML = `
+          <p>${escapeHTML(d.demo)}</p>
+          <div class="answer-row">
+            <input id="ans-${id}">
+            <button onclick="checkAns(${id})">Check</button>
+            <span id="res-${id}"></span>
+          </div>
+          <input type="hidden" id="corr-${id}" value="${escapeAttr(d.missing)}">
+        `;
+      });
+    }
+
+    function checkAns(id) {
+      const ans = document.getElementById(`ans-${id}`).value.trim().toLowerCase();
+      const corr = document.getElementById(`corr-${id}`).value.trim().toLowerCase();
+      const res = document.getElementById(`res-${id}`);
+      if (ans === corr) { res.textContent = 'Correct!'; res.className = 'ok'; }
+      else { res.textContent = `Wrong. Correct: ${corr}`; res.className = 'bad'; }
+    }
+
+    function runImageScramble(id) {
+      fetch(`/demo-image-scramble/${id}`).then(r=>r.json()).then(d=>{
+        document.getElementById(`demo-${id}`).innerHTML =
+          `<img src="data:image/jpeg;base64,${d.image_base64}">`;
+      });
+    }
+
+    function escapeHTML(s) {
+      return String(s).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+    }
+    function escapeAttr(s) {
+      return String(s).replaceAll('"',"&quot;").replaceAll("'","&#39;");
+    }
+
+    loadFeed();
+  </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+/* Global styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #a8edea 0%, #fed6e3 50%, #d4c1ec 100%);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+  min-height: 100vh;
+}
+
+
+/* Heading */
+h1 {
+  text-align: center;
+  color: #151212;
+  font-size: 2.5rem;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.3);
+  margin-bottom: 20px;
+}
+
+/* Input and Buttons */
+input {
+  margin: 5px;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  transition: 0.3s;
+}
+
+input:focus {
+  border-color: #66a6ff;
+  outline: none;
+}
+
+button {
+  padding: 8px 14px;
+  margin: 5px;
+  border: none;
+  border-radius: 6px;
+  background: #ceee78;
+  color: white;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background:#c1d2a7;
+}
+
+/* Feed items */
+.feed-item {
+  margin: 20px 0;
+  padding: 15px;
+  border-radius: 10px;
+  background: #eef5d5;
+  box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Puzzle Words */
+.puzzle-word {
+  padding: 6px 12px;
+  margin: 5px;
+  background: #f8f9ff;
+  border: 1px solid #ccd9ff;
+  border-radius: 6px;
+  cursor: grab;
+  display: inline-block;
+  box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+  transition: 0.2s;
+}
+
+.puzzle-word:hover {
+  background: #eaf1ff;
+  transform: scale(1.05);
+}
+
+/* Puzzle Container */
+.puzzle-container {
+  margin-top: 10px;
+  border: 2px dashed #66a6ff;
+  padding: 12px;
+  min-height: 60px;
+  border-radius: 8px;
+  background: #f5f5f7;
+}
+
+/* Image Puzzle Grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  grid-template-rows: repeat(3, 100px);
+  gap: 3px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.tile {
+  width: 100px;
+  height: 100px;
+  background-size: 300px 300px;
+  cursor: grab;
+  border-radius: 4px;
+  transition: transform 0.2s;
+}
+
+.tile:hover {
+  transform: scale(1.05);
+}
+
+/* Correct Answer Indicator */
+.correct {
+  color: green;
+  font-weight: bold;
+  margin-top: 10px;
+  font-size: 1.1rem;
+}
+
+/* Smooth fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

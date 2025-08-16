@@ -1,0 +1,48 @@
+{
+  "memories": [
+    {
+      "id": 1,
+      "type": "TEXT",
+      "content": "my first solo trip to australia"
+    },
+    {
+      "id": 2,
+      "type": "IMAGE",
+      "url": "https://picsum.photos/800/600"
+    },
+    {
+      "id": 3,
+      "type": "TEXT",
+      "content": "my trip to bombay"
+    },
+    {
+      "id": 4,
+      "type": "TEXT",
+      "content": "my solo trip"
+    },
+    {
+      "type": "text",
+      "content": "my solo trip"
+    },
+    {
+      "type": "image",
+      "content": "http://127.0.0.1:5000"
+    },
+    {
+      "id": 5,
+      "type": "image",
+      "url": "https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.bigfootdigital.co.uk%2Fhow-to-optimise-images&psig=AOvVaw0OQ8LJlPXauvYQob2tbHnF&ust=1755415567698000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCJikhd7mjo8DFQAAAAAdAAAAABAE"
+    },
+    {
+      "id": 6,
+      "type": "text",
+      "content": "my solo trip to usa"
+    },
+    {
+      "id": 7,
+      "type": "audio",
+      "url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+      "transcript": "just a song"
+    }
+  ]
+}
