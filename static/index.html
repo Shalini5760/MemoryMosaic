@@ -231,6 +231,46 @@ function uploadFile() {
       feed.appendChild(item);
       createAudioPuzzle(fileUrl, item);
     }
+    function makeTileDraggable(tile, grid, result, url) {
+  let draggedTile = null;
+
+  // Desktop drag & drop
+  tile.setAttribute("draggable", true);
+  tile.addEventListener("dragstart", e => {
+    draggedTile = tile;
+  });
+  grid.addEventListener("dragover", e => e.preventDefault());
+  grid.addEventListener("drop", e => {
+    e.preventDefault();
+    if (draggedTile && e.target.classList.contains("tile")) {
+      swapTiles(grid, draggedTile, e.target);
+      checkImageAnswer(grid, url, result);
+    }
+  });
+
+  // Mobile touch support
+  tile.addEventListener("touchstart", e => {
+    draggedTile = tile;
+  });
+
+  tile.addEventListener("touchend", e => {
+    let touch = e.changedTouches[0];
+    let target = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (draggedTile && target && target.classList.contains("tile") && target !== draggedTile) {
+      swapTiles(grid, draggedTile, target);
+      checkImageAnswer(grid, url, result);
+    }
+    draggedTile = null;
+  });
+}
+
+function swapTiles(grid, t1, t2) {
+  let temp = document.createElement("div");
+  grid.replaceChild(temp, t1);
+  grid.replaceChild(t1, t2);
+  grid.replaceChild(t2, temp);
+}
+
   </script>
 </body>
 </html>
