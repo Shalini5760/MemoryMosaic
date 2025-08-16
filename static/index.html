@@ -16,8 +16,10 @@
   </div>
 
   <div>
-    <input type="text" id="imgInput" placeholder="Enter Image URL">
-    <button onclick="addImage()">Add Image</button>
+  <input type="file" id="fileInput" accept="image/*">
+  <button onclick="uploadFile()">Add Image</button>
+
+
   </div>
 
   <div>
@@ -92,73 +94,81 @@
     }
 
     // --- IMAGE PUZZLE ---
-    function createImagePuzzle(url, container) {
-      const grid = document.createElement("div");
-      grid.className = "grid";
+function createImagePuzzle(url, container) {
+  const grid = document.createElement("div");
+  grid.className = "grid";
 
-      let tiles = [];
-      for (let row = 0; row < 3; row++) {
-        for (let col = 0; col < 3; col++) {
-          const tile = document.createElement("div");
-          tile.className = "tile";
-          tile.style.backgroundImage = `url(${url})`;
-          tile.style.backgroundPosition = `-${col * 100}px -${row * 100}px`;
-          tiles.push(tile);
-        }
-      }
-
-      // Shuffle tiles
-      tiles.sort(() => Math.random() - 0.5);
-      tiles.forEach(t => grid.appendChild(t));
-
-      let draggedTile = null;
-      grid.addEventListener("dragstart", e => {
-        draggedTile = e.target;
-      });
-      grid.addEventListener("dragover", e => e.preventDefault());
-      grid.addEventListener("drop", e => {
-        e.preventDefault();
-        if (draggedTile && e.target.classList.contains("tile")) {
-          let temp = document.createElement("div");
-          grid.replaceChild(temp, draggedTile);
-          grid.replaceChild(draggedTile, e.target);
-          grid.replaceChild(e.target, temp);
-        }
-        checkImageAnswer(grid, url, result);
-      });
-
-      const result = document.createElement("p");
-      container.appendChild(grid);
-      container.appendChild(result);
+  let tiles = [];
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      tile.draggable = true;
+      tile.style.backgroundImage = `url(${url})`;
+      tile.style.backgroundPosition = `-${col * 100}px -${row * 100}px`;
+      tiles.push(tile);
     }
+  }
 
-    function checkImageAnswer(grid, url, result) {
-      const correctPositions = [];
-      for (let row = 0; row < 3; row++) {
-        for (let col = 0; col < 3; col++) {
-          correctPositions.push(`-${col * 100}px -${row * 100}px`);
-        }
-      }
-      const current = [...grid.children].map(tile => tile.style.backgroundPosition);
-      if (JSON.stringify(current) === JSON.stringify(correctPositions)) {
-        result.textContent = "✅ Correct!";
-        result.style.color = "green";
-      } else {
-        result.textContent = "";
-      }
+  // Shuffle tiles
+  tiles.sort(() => Math.random() - 0.5);
+  tiles.forEach(t => grid.appendChild(t));
+
+  let draggedTile = null;
+  grid.addEventListener("dragstart", e => {
+    draggedTile = e.target;
+  });
+  grid.addEventListener("dragover", e => e.preventDefault());
+  grid.addEventListener("drop", e => {
+    e.preventDefault();
+    if (draggedTile && e.target.classList.contains("tile")) {
+      let temp = document.createElement("div");
+      grid.replaceChild(temp, draggedTile);
+      grid.replaceChild(draggedTile, e.target);
+      grid.replaceChild(e.target, temp);
     }
+    checkImageAnswer(grid, url, result);
+  });
 
-    function addImage() {
-      const url = document.getElementById("imgInput").value.trim();
-      if (!url) return;
-      const feed = document.getElementById("feed");
-      const item = document.createElement("div");
-      item.className = "feed-item";
-      item.innerHTML = "<b>IMAGE — arrange the tiles</b>";
-      feed.appendChild(item);
-      createImagePuzzle(url, item);
+  const result = document.createElement("p");
+  container.appendChild(grid);
+  container.appendChild(result);
+}
+
+function checkImageAnswer(grid, url, result) {
+  const correctPositions = [];
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      correctPositions.push(`-${col * 100}px -${row * 100}px`);
     }
+  }
+  const current = [...grid.children].map(tile => tile.style.backgroundPosition);
+  if (JSON.stringify(current) === JSON.stringify(correctPositions)) {
+    result.textContent = "✅ Correct!";
+    result.style.color = "green";
+  } else {
+    result.textContent = "";
+  }
+}
 
+// --- NEW FUNCTION FOR FILE UPLOAD ---
+function uploadFile() {
+  const fileInput = document.getElementById("fileInput");
+  const file = fileInput.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const url = e.target.result;
+    const feed = document.getElementById("feed");
+    const item = document.createElement("div");
+    item.className = "feed-item";
+    item.innerHTML = "<b>IMAGE — arrange the tiles</b>";
+    feed.appendChild(item);
+    createImagePuzzle(url, item);
+  };
+  reader.readAsDataURL(file); // convert image file → base64 URL
+}
     // --- AUDIO PUZZLE ---
     function createAudioPuzzle(fileUrl, container) {
       const words = ["AUDIO", "SCRAMBLED", "CLIP"];
