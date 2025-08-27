@@ -10,6 +10,17 @@ body {
   color: #333;
   min-height: 100vh;
 }
+.container {
+  display: flex;
+  flex-direction: column;  /* stack vertically */
+  justify-content: center; /* center vertically */
+  align-items: center;     /* center horizontally */
+  height: 30vh;           /* take full screen height */
+}
+
+.input-section {
+  margin: 5px;
+}
 
 
 /* Heading */
@@ -124,3 +135,5 @@ button:hover {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+
