@@ -7,6 +7,10 @@ import { v4 as uuidv4 } from "uuid";
 import fetch from "node-fetch";
 import path from "path";
 import { fileURLToPath } from "url";
+import multer from "multer";
+import fs from "fs";
+import OpenAI from "openai";
+
 
 // ---------------- Paths ----------------
 const __filename = fileURLToPath(import.meta.url);
@@ -16,6 +20,36 @@ const __dirname = path.dirname(__filename);
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));
+// file uploads (temp dir)
+const upload = multer({ dest: "uploads/" });
+
+// OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+// --- Audio → Text (Whisper) ---
+app.post("/upload-audio", upload.single("audio"), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: "no file" });
+
+    const fileStream = fs.createReadStream(req.file.path);
+
+    // Whisper transcription
+    const response = await openai.audio.transcriptions.create({
+      model: "whisper-1",
+      file: fileStream
+    });
+
+    res.json({ text: (response.text || "").trim() });
+  } catch (err) {
+    console.error("Whisper error:", err);
+    res.status(500).json({ error: "transcription failed" });
+  } finally {
+    // cleanup temp file
+    try { fs.unlinkSync(req.file.path); } catch {}
+  }
+});
+
 
 // ---------------- HTTP + Socket.io ----------------
 const server = http.createServer(app);
